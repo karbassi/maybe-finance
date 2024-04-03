@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16.1
+    environment:
+      POSTGRES_USER: maybe
+      POSTGRES_PASSWORD: maybepass
+      POSTGRES_DB: maybedb
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports: ['5432:5432']
+
+  app:
+    build: .
+    environment:
+      SSL_ENABLED: false
+      SECRET_KEY_BASE: maybemaybehash
+      RAILS_MAX_THREADS: 5 #optional
+      DB_HOST: db
+      POSTGRES_USER: maybe
+      POSTGRES_PASSWORD: maybepass
+      POSTGRES_DB: maybedb
+    ports: ['3000:3000']
+    depends_on:
+      - db
+volumes:
+  db_data:
